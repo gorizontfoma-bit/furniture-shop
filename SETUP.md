@@ -7,7 +7,7 @@ Telegram Mini App (магазин кресел RELAX) с реферальной 
 ## Архитектура
 
 ```
-Блогер шарит:  t.me/BOT/shop?startapp=ref_bloger1
+Блогер шарит:  t.me/orelaxshop_bot?startapp=ref_bloger1
                     ↓
 Mini App (GitHub Pages) → каталог кресел → форма заказа
                     ↓
@@ -75,9 +75,9 @@ IMG_BASE: 'https://kresla.orelax.ru/img/'
 
 ### Ссылки для блогеров
 ```
-https://t.me/BOT_USERNAME/shop?startapp=ref_bloger1
-https://t.me/BOT_USERNAME/shop?startapp=ref_ivan
-https://t.me/BOT_USERNAME/shop?startapp=ref_masha
+https://t.me/orelaxshop_bot?startapp=ref_bloger1
+https://t.me/orelaxshop_bot?startapp=ref_ivan
+https://t.me/orelaxshop_bot?startapp=ref_masha
 ```
 
 ### Команды для блогеров (проверка статистики)
