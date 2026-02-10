@@ -7,7 +7,7 @@
 // =============================================
 const CONFIG = {
   // URL вебхука n8n (получишь после импорта workflow)
-  WEBHOOK_URL: 'https://YOUR_N8N_INSTANCE.app.n8n.cloud/webhook/furniture-order',
+  WEBHOOK_URL: 'https://artempanin69.app.n8n.cloud/webhook/furniture-order',
 
   // Твой Telegram chat_id (куда приходят уведомления о заказах)
   // Узнать: напиши @userinfobot в Telegram
