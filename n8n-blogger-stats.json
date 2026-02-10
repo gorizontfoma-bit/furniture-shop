@@ -1,0 +1,132 @@
+{
+  "name": "Furniture Shop — Blogger Stats",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {}
+      },
+      "id": "tg-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Furniture Shop Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Парсим команду блогера\n// /bloger1 → ref_bloger1\n// /ivan → ref_ivan\n\nconst msg = $input.first().json.message;\nconst text = (msg.text || '').trim();\nconst chatId = msg.chat.id;\n\n// Проверяем что это команда (начинается с /)\nif (!text.startsWith('/') || text === '/start') {\n  // Не команда блогера — игнорируем\n  return [];\n}\n\n// Убираем / и @botname если есть\nconst command = text.split('@')[0].substring(1);\nconst refCode = 'ref_' + command;\n\nreturn [{ json: { refCode, chatId, command } }];"
+      },
+      "id": "parse-command",
+      "name": "Parse Blogger Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_blogger_stats('{{ $json.refCode }}')"
+      },
+      "id": "get-stats",
+      "name": "Get Stats from Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [720, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "SUPABASE_CREDENTIAL_ID",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Формируем ответ блогеру\nconst input = $input.first().json;\nconst prev = $('Parse Blogger Command').first().json;\n\n// get_blogger_stats возвращает JSON\nlet stats;\nif (typeof input === 'object' && input.get_blogger_stats) {\n  stats = typeof input.get_blogger_stats === 'string' \n    ? JSON.parse(input.get_blogger_stats) \n    : input.get_blogger_stats;\n} else {\n  stats = input;\n}\n\nconst orders = stats.total_orders || 0;\nconst revenue = stats.total_revenue || 0;\nconst commission = stats.commission || 0;\nconst lastOrder = stats.last_order;\n\nconst lastOrderStr = lastOrder \n  ? new Date(lastOrder).toLocaleDateString('ru-RU') \n  : 'нет заказов';\n\nconst revenueStr = Number(revenue).toLocaleString('ru-RU');\nconst commissionStr = Number(commission).toLocaleString('ru-RU');\n\nlet message;\nif (orders === 0) {\n  message = `📊 <b>Статистика: ${prev.command}</b>\\n\\n` +\n    `Заказов пока нет.\\n\\n` +\n    `Ваша реферальная ссылка:\\n` +\n    `<code>https://t.me/BOT_USERNAME/shop?startapp=${prev.refCode}</code>\\n\\n` +\n    `Отправляйте её клиентам!`;\n} else {\n  message = `📊 <b>Статистика: ${prev.command}</b>\\n\\n` +\n    `├ Заказов: <b>${orders}</b>\\n` +\n    `├ Сумма продаж: <b>${revenueStr} ₽</b>\\n` +\n    `├ Ваша комиссия (30%): <b>${commissionStr} ₽</b>\\n` +\n    `└ Последний заказ: ${lastOrderStr}`;\n}\n\nreturn [{ json: { message, chatId: prev.chatId } }];"
+      },
+      "id": "format-stats",
+      "name": "Format Stats Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "send-stats",
+      "name": "Send Stats to Blogger",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1200, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Furniture Shop Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Blogger Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Blogger Command": {
+      "main": [
+        [
+          {
+            "node": "Get Stats from Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Stats from Supabase": {
+      "main": [
+        [
+          {
+            "node": "Format Stats Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Stats Message": {
+      "main": [
+        [
+          {
+            "node": "Send Stats to Blogger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

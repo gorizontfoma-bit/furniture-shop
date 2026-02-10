@@ -19,13 +19,47 @@
     },
     {
       "parameters": {
-        "jsCode": "// Формируем сообщение для Telegram\nconst order = $input.first().json.body;\n\nconst refLine = order.referral_code \n  ? `\\n👤 <b>Блогер:</b> ${order.referral_code}` \n  : '';\n\nconst tgUserLine = order.telegram_username \n  ? `\\n💬 Telegram: @${order.telegram_username}` \n  : (order.telegram_user_id ? `\\n💬 Telegram ID: ${order.telegram_user_id}` : '');\n\nconst colorLine = order.color \n  ? `\\n🎨 Цвет: ${order.color}` \n  : '';\n\nconst commentLine = order.comment \n  ? `\\n📝 Комментарий: ${order.comment}` \n  : '';\n\nconst message = `🔔 <b>НОВЫЙ ЗАКАЗ!</b>\\n\\n` +\n  `🪑 <b>${order.product_name}</b>\\n` +\n  `${order.product_composition}${colorLine}\\n` +\n  `💰 <b>${Number(order.product_price).toLocaleString('ru-RU')} ₽</b>\\n\\n` +\n  `👤 <b>Клиент:</b> ${order.customer_name}\\n` +\n  `📞 ${order.customer_phone}\\n` +\n  `🏙 ${order.customer_city}` +\n  tgUserLine +\n  commentLine +\n  refLine +\n  `\\n\\n⏰ ${new Date(order.timestamp).toLocaleString('ru-RU')}`;\n\nreturn [{ json: { message, order } }];"
+        "jsCode": "// Формируем сообщение для Telegram + данные для Supabase\nconst order = $input.first().json.body;\n\nconst refLine = order.referral_code \n  ? `\\n👤 <b>Блогер:</b> ${order.referral_code}` \n  : '';\n\nconst tgUserLine = order.telegram_username \n  ? `\\n💬 Telegram: @${order.telegram_username}` \n  : (order.telegram_user_id ? `\\n💬 Telegram ID: ${order.telegram_user_id}` : '');\n\nconst colorLine = order.color \n  ? `\\n🎨 Цвет: ${order.color}` \n  : '';\n\nconst commentLine = order.comment \n  ? `\\n📝 Комментарий: ${order.comment}` \n  : '';\n\nconst message = `🔔 <b>НОВЫЙ ЗАКАЗ!</b>\\n\\n` +\n  `🪑 <b>${order.product_name}</b>\\n` +\n  `${order.product_composition}${colorLine}\\n` +\n  `💰 <b>${Number(order.product_price).toLocaleString('ru-RU')} ₽</b>\\n\\n` +\n  `👤 <b>Клиент:</b> ${order.customer_name}\\n` +\n  `📞 ${order.customer_phone}\\n` +\n  `🏙 ${order.customer_city}` +\n  tgUserLine +\n  commentLine +\n  refLine +\n  `\\n\\n⏰ ${new Date(order.timestamp).toLocaleString('ru-RU')}`;\n\nreturn [{ json: { message, order } }];"
       },
       "id": "format-message",
       "name": "Format Telegram Message",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "tableId": "furniture_orders",
+        "fieldsToSend": "defineBelow",
+        "fieldValues": {
+          "values": [
+            { "fieldName": "product_id", "fieldValue": "={{ $json.order.product_id }}" },
+            { "fieldName": "product_name", "fieldValue": "={{ $json.order.product_name }}" },
+            { "fieldName": "product_composition", "fieldValue": "={{ $json.order.product_composition }}" },
+            { "fieldName": "product_price", "fieldValue": "={{ $json.order.product_price }}" },
+            { "fieldName": "color", "fieldValue": "={{ $json.order.color }}" },
+            { "fieldName": "customer_name", "fieldValue": "={{ $json.order.customer_name }}" },
+            { "fieldName": "customer_phone", "fieldValue": "={{ $json.order.customer_phone }}" },
+            { "fieldName": "customer_city", "fieldValue": "={{ $json.order.customer_city }}" },
+            { "fieldName": "comment", "fieldValue": "={{ $json.order.comment }}" },
+            { "fieldName": "telegram_user_id", "fieldValue": "={{ $json.order.telegram_user_id }}" },
+            { "fieldName": "telegram_username", "fieldValue": "={{ $json.order.telegram_username }}" },
+            { "fieldName": "referral_code", "fieldValue": "={{ $json.order.referral_code }}" }
+          ]
+        }
+      },
+      "id": "save-to-supabase",
+      "name": "Save Order to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [720, 160],
+      "credentials": {
+        "supabaseApi": {
+          "id": "SUPABASE_CREDENTIAL_ID",
+          "name": "Supabase"
+        }
+      }
     },
     {
       "parameters": {
@@ -39,7 +73,7 @@
       "name": "Send to Owner Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [720, 300],
+      "position": [720, 440],
       "credentials": {
         "telegramApi": {
           "id": "TELEGRAM_CREDENTIAL_ID",
@@ -93,7 +127,23 @@
       "main": [
         [
           {
+            "node": "Save Order to Supabase",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Send to Owner Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Order to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
             "type": "main",
             "index": 0
           }
