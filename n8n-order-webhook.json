@@ -1,0 +1,122 @@
+{
+  "name": "Furniture Shop — Orders Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "furniture-order",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook — Order Received",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "furniture-order"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Формируем сообщение для Telegram\nconst order = $input.first().json.body;\n\nconst refLine = order.referral_code \n  ? `\\n👤 <b>Блогер:</b> ${order.referral_code}` \n  : '';\n\nconst tgUserLine = order.telegram_username \n  ? `\\n💬 Telegram: @${order.telegram_username}` \n  : (order.telegram_user_id ? `\\n💬 Telegram ID: ${order.telegram_user_id}` : '');\n\nconst colorLine = order.color \n  ? `\\n🎨 Цвет: ${order.color}` \n  : '';\n\nconst commentLine = order.comment \n  ? `\\n📝 Комментарий: ${order.comment}` \n  : '';\n\nconst message = `🔔 <b>НОВЫЙ ЗАКАЗ!</b>\\n\\n` +\n  `🪑 <b>${order.product_name}</b>\\n` +\n  `${order.product_composition}${colorLine}\\n` +\n  `💰 <b>${Number(order.product_price).toLocaleString('ru-RU')} ₽</b>\\n\\n` +\n  `👤 <b>Клиент:</b> ${order.customer_name}\\n` +\n  `📞 ${order.customer_phone}\\n` +\n  `🏙 ${order.customer_city}` +\n  tgUserLine +\n  commentLine +\n  refLine +\n  `\\n\\n⏰ ${new Date(order.timestamp).toLocaleString('ru-RU')}`;\n\nreturn [{ json: { message, order } }];"
+      },
+      "id": "format-message",
+      "name": "Format Telegram Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "=YOUR_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "send-telegram",
+      "name": "Send to Owner Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [720, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Furniture Shop Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Order received' }) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-success",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [960, 300]
+    }
+  ],
+  "connections": {
+    "Webhook — Order Received": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Send to Owner Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Owner Telegram": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

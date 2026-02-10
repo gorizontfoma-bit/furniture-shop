@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>RELAX Кресла</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">
+      <span class="logo-icon">🪑</span>
+      <div>
+        <h1>RELAX</h1>
+        <p class="header-sub">Кресла из карельской сосны</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- PROMO BANNER -->
+  <section class="promo-banner">
+    <div class="promo-text">
+      <span class="promo-badge">Февраль</span>
+      Скидки до <strong>33%</strong> — цены вырастут в мае!
+    </div>
+  </section>
+
+  <!-- CATALOG TABS -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="relax">RELAX Макс</button>
+    <button class="tab" data-tab="chill">ЧИЛЛ</button>
+    <button class="tab" data-tab="accessories">Аксессуары</button>
+  </nav>
+
+  <!-- PRODUCT GRID -->
+  <main id="catalog" class="catalog"></main>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div id="product-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div class="modal-gallery" id="modal-gallery"></div>
+      <div class="modal-info">
+        <h2 id="modal-title"></h2>
+        <p id="modal-description"></p>
+        <div class="modal-specs" id="modal-specs"></div>
+        <div class="modal-price-row">
+          <span class="modal-old-price" id="modal-old-price"></span>
+          <span class="modal-price" id="modal-price"></span>
+        </div>
+
+        <!-- Color picker (for armchairs only) -->
+        <div id="color-picker" class="color-picker hidden">
+          <p class="color-label">Цвет каркаса:</p>
+          <div class="color-options" id="color-options"></div>
+          <p class="color-name" id="color-name"></p>
+        </div>
+
+        <button class="btn-order" id="btn-order">Заказать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER FORM MODAL -->
+  <div id="order-modal" class="modal hidden">
+    <div class="modal-content order-form-content">
+      <button class="modal-close" id="order-modal-close">&times;</button>
+      <h2>Оформление заказа</h2>
+      <div class="order-summary" id="order-summary"></div>
+      <form id="order-form">
+        <div class="form-group">
+          <label for="order-name">Ваше имя</label>
+          <input type="text" id="order-name" required placeholder="Иван">
+        </div>
+        <div class="form-group">
+          <label for="order-phone">Телефон</label>
+          <input type="tel" id="order-phone" required placeholder="+7 999 123-45-67">
+        </div>
+        <div class="form-group">
+          <label for="order-city">Город</label>
+          <input type="text" id="order-city" required placeholder="Москва">
+        </div>
+        <div class="form-group">
+          <label for="order-comment">Комментарий (необязательно)</label>
+          <textarea id="order-comment" rows="2" placeholder="Вопросы по доставке, пожелания..."></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="btn-submit">
+          Отправить заявку
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="success-modal" class="modal hidden">
+    <div class="modal-content success-content">
+      <div class="success-icon">&#10003;</div>
+      <h2>Заявка отправлена!</h2>
+      <p>Мы свяжемся с вами в ближайшее время для уточнения деталей доставки.</p>
+      <button class="btn-order" id="btn-back-catalog">Вернуться в каталог</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>Грузоподъёмность до 300 кг &bull; Карельская сосна &bull; Ткань Оксфорд</p>
+    <p class="footer-link">
+      <a href="https://kresla.orelax.ru/" target="_blank">kresla.orelax.ru</a>
+    </p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
