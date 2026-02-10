@@ -29,7 +29,7 @@
     },
     {
       "parameters": {
-        "chatId": "=YOUR_CHAT_ID",
+        "chatId": "=1376926458",
         "text": "={{ $json.message }}",
         "additionalFields": {
           "parse_mode": "HTML"

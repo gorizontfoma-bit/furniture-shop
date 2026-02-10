@@ -11,7 +11,7 @@ const CONFIG = {
 
   // Твой Telegram chat_id (куда приходят уведомления о заказах)
   // Узнать: напиши @userinfobot в Telegram
-  OWNER_CHAT_ID: 'YOUR_CHAT_ID',
+  OWNER_CHAT_ID: '1376926458',
 
   // Базовый URL для изображений
   IMG_BASE: 'https://kresla.orelax.ru/img/',
